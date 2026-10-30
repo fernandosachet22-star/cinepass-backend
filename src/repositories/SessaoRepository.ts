@@ -1,4 +1,3 @@
-
 import prisma from '../database/prisma';
 
 interface CriarSessaoDTO {
@@ -49,6 +48,49 @@ class SessaoRepository {
           },
         },
       },
+    });
+  }
+
+  async expirarReservas(sessaoId: number, agora: Date) {
+    return prisma.$transaction(async (tx) => {
+      const expiradas = await tx.reserva.findMany({
+        where: {
+          sessaoId,
+          status: 'ATIVA',
+          expiraEm: { lte: agora },
+        },
+        select: { id: true },
+      });
+
+      const idsExpirados = expiradas.map((reserva) => reserva.id);
+
+      if (idsExpirados.length > 0) {
+        await tx.reservaAssento.deleteMany({
+          where: {
+            reservaId: { in: idsExpirados },
+          },
+        });
+
+        await tx.reserva.updateMany({
+          where: {
+            id: { in: idsExpirados },
+          },
+          data: { status: 'EXPIRADA' },
+        });
+      }
+    });
+  }
+
+  async listarReservasPorSessao(sessaoId: number) {
+    return prisma.reservaAssento.findMany({
+      where: { sessaoId },
+      include: { reserva: true },
+    });
+  }
+
+  async buscarSalaPorId(salaId: number) {
+    return prisma.sala.findUnique({
+      where: { id: salaId },
     });
   }
 

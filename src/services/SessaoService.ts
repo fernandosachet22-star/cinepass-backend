@@ -1,7 +1,5 @@
-
 import SessaoRepository from '../repositories/SessaoRepository';
 import FilmeRepository from '../repositories/FilmeRepository';
-import prisma from '../database/prisma';
 
 class SessaoService {
   async listarPorFilme(filmeId: number) {
@@ -25,43 +23,15 @@ class SessaoService {
 
     const agora = new Date();
 
-    const expiradas = await prisma.reserva.findMany({
-      where: {
-        sessaoId,
-        status: 'ATIVA',
-        expiraEm: { lte: agora },
-      },
-      select: { id: true },
-    });
-
-    const idsExpirados = expiradas.map((reserva) => reserva.id);
-
-    if (idsExpirados.length > 0) {
-      await prisma.$transaction([
-        prisma.reservaAssento.deleteMany({
-          where: {
-            reservaId: { in: idsExpirados },
-          },
-        }),
-        prisma.reserva.updateMany({
-          where: {
-            id: { in: idsExpirados },
-          },
-          data: { status: 'EXPIRADA' },
-        }),
-      ]);
-    }
-
     const sessao = await SessaoRepository.buscarAssentosPorSessao(sessaoId);
 
     if (!sessao) {
       throw new Error('Sessão não encontrada.');
     }
 
-    const reservas = await prisma.reservaAssento.findMany({
-      where: { sessaoId },
-      include: { reserva: true },
-    });
+    await SessaoRepository.expirarReservas(sessaoId, agora);
+
+    const reservas = await SessaoRepository.listarReservasPorSessao(sessaoId);
 
     const reservasPorAssento = new Map(
       reservas.map((reserva) => [reserva.assentoId, reserva])
@@ -128,9 +98,7 @@ class SessaoService {
       throw new Error('Filme não encontrado.');
     }
 
-    const sala = await prisma.sala.findUnique({
-      where: { id: dados.salaId },
-    });
+    const sala = await SessaoRepository.buscarSalaPorId(dados.salaId);
 
     if (!sala) {
       throw new Error('Sala não encontrada.');

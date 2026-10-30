@@ -20,6 +20,12 @@ enum StatusAssentoReserva {
   VENDIDO
 }
 
+enum PerfilUsuario {
+  CLIENTE
+  OPERADOR
+  ADMINISTRADOR
+}
+
 model Sala {
   id                 Int      @id @default(autoincrement())
   nome               String   @unique
@@ -116,4 +122,14 @@ model Ingresso {
   reservaAssento ReservaAssento @relation(fields: [reservaAssentoId], references: [id])
 
   @@index([codigo])
+}
+
+model Usuario {
+  id        Int           @id @default(autoincrement())
+  nome      String
+  email     String        @unique
+  senhaHash String
+  perfil    PerfilUsuario @default(CLIENTE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }

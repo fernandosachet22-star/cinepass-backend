@@ -1,6 +1,4 @@
-
 import ReservaRepository from '../repositories/ReservaRepository';
-import prisma from '../database/prisma';
 
 class ReservaService {
   async criar(sessaoId: number, assentosIds: number[]) {
@@ -19,19 +17,15 @@ class ReservaService {
       throw new Error('Lista de assentos inválida.');
     }
 
-    const sessao = await prisma.sessao.findUnique({
-      where: { id: sessaoId },
-    });
+    const sessao = await ReservaRepository.buscarSessaoPorId(sessaoId);
 
     if (!sessao) {
       throw new Error('Sessão não encontrada.');
     }
 
-    const assentos = await prisma.assento.findMany({
-      where: {
-        id: { in: assentosIds },
-      },
-    });
+    const assentos = await ReservaRepository.buscarAssentosPorIds(
+      assentosIds
+    );
 
     if (assentos.length !== assentosIds.length) {
       throw new Error('Um ou mais assentos não foram encontrados.');

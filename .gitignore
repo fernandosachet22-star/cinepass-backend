@@ -33,3 +33,10 @@ yarn-error.log*
 # Arquivos temporários
 *.tmp
 *.bak
+
+# Configurações de ferramentas auxiliares
+.agents/
+.claude/
+.cursor/
+.devin/
+.windsurf/

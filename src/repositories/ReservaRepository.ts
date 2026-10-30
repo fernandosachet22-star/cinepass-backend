@@ -1,4 +1,3 @@
-
 import prisma from '../database/prisma';
 
 interface CriarReservaDTO {
@@ -7,11 +6,24 @@ interface CriarReservaDTO {
 }
 
 class ReservaRepository {
+  buscarSessaoPorId(sessaoId: number) {
+    return prisma.sessao.findUnique({
+      where: { id: sessaoId },
+    });
+  }
+
+  buscarAssentosPorIds(assentosIds: number[]) {
+    return prisma.assento.findMany({
+      where: {
+        id: { in: assentosIds },
+      },
+    });
+  }
+
   async criar(dados: CriarReservaDTO) {
     const agora = new Date();
 
     return prisma.$transaction(async (tx) => {
-      // Localiza reservas que já expiraram.
       const expiradas = await tx.reserva.findMany({
         where: {
           sessaoId: dados.sessaoId,
