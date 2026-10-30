@@ -1,0 +1,119 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum StatusReserva {
+  ATIVA
+  EXPIRADA
+  CONFIRMADA
+  CANCELADA
+}
+
+enum StatusAssentoReserva {
+  RESERVADO
+  VENDIDO
+}
+
+model Sala {
+  id                 Int      @id @default(autoincrement())
+  nome               String   @unique
+  fileiras           Int
+  assentosPorFileira Int
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  assentos Assento[]
+  sessoes  Sessao[]
+}
+
+model Assento {
+  id      Int    @id @default(autoincrement())
+  codigo  String
+  fileira String
+  numero  Int
+  salaId  Int
+  sala    Sala   @relation(fields: [salaId], references: [id])
+
+  reservas ReservaAssento[]
+
+  @@unique([salaId, codigo])
+  @@unique([salaId, fileira, numero])
+}
+
+model Filme {
+  id            Int      @id @default(autoincrement())
+  titulo        String
+  descricao     String
+  duracao       Int
+  classificacao String
+  genero        String
+  imagem        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessoes Sessao[]
+}
+
+model Sessao {
+  id        Int      @id @default(autoincrement())
+  dataHora  DateTime
+  preco     Decimal  @db.Decimal(10, 2)
+  filmeId   Int
+  salaId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  filme    Filme            @relation(fields: [filmeId], references: [id])
+  sala     Sala             @relation(fields: [salaId], references: [id])
+  reservas Reserva[]
+  assentos ReservaAssento[]
+}
+
+model Reserva {
+  id       Int           @id @default(autoincrement())
+  criadaEm DateTime      @default(now())
+  expiraEm DateTime
+  status   StatusReserva @default(ATIVA)
+  sessaoId Int
+
+  sessao   Sessao           @relation(fields: [sessaoId], references: [id])
+  assentos ReservaAssento[]
+
+  @@index([expiraEm])
+  @@index([sessaoId, status])
+}
+
+model ReservaAssento {
+  id        Int                  @id @default(autoincrement())
+  reservaId Int
+  sessaoId  Int
+  assentoId Int
+  status    StatusAssentoReserva @default(RESERVADO)
+
+  reserva  Reserva  @relation(fields: [reservaId], references: [id], onDelete: Cascade)
+  sessao   Sessao   @relation(fields: [sessaoId], references: [id])
+  assento  Assento  @relation(fields: [assentoId], references: [id])
+  ingresso Ingresso?
+
+  @@unique([sessaoId, assentoId])
+  @@index([reservaId])
+  @@index([sessaoId, status])
+}
+
+model Ingresso {
+  id               Int      @id @default(autoincrement())
+  codigo           String   @unique
+  criadoEm         DateTime @default(now())
+  utilizadoEm      DateTime?
+  reservaAssentoId Int      @unique
+
+  reservaAssento ReservaAssento @relation(fields: [reservaAssentoId], references: [id])
+
+  @@index([codigo])
+}
