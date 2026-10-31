@@ -27,6 +27,13 @@ class IngressoRepository {
 
   async validar(codigo: string) {
     return prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`
+        SELECT id
+        FROM "Ingresso"
+        WHERE codigo = ${codigo}
+        FOR UPDATE
+      `;
+
       const ingresso = await tx.ingresso.findUnique({
         where: { codigo },
       });
