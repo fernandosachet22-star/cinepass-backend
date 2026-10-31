@@ -5,6 +5,13 @@ import { randomUUID } from 'crypto';
 class CompraRepository {
   async confirmarReserva(reservaId: number) {
     return prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`
+        SELECT id
+        FROM "Reserva"
+        WHERE id = ${reservaId}
+        FOR UPDATE
+      `;
+
       const reserva = await tx.reserva.findUnique({
         where: { id: reservaId },
         include: {
