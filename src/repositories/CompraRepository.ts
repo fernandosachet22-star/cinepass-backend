@@ -3,7 +3,7 @@ import prisma from '../database/prisma';
 import { randomUUID } from 'crypto';
 
 class CompraRepository {
-  async confirmarReserva(reservaId: number) {
+  async confirmarReserva(reservaId: number, usuarioId: number) {
     return prisma.$transaction(async (tx) => {
       await tx.$queryRaw`
         SELECT id
@@ -26,6 +26,10 @@ class CompraRepository {
 
       if (!reserva) {
         throw new Error('Reserva não encontrada.');
+      }
+
+      if (reserva.usuarioId !== usuarioId) {
+        throw new Error('Você não tem permissão para comprar esta reserva.');
       }
 
       if (reserva.status !== 'ATIVA') {

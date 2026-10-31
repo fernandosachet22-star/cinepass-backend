@@ -25,6 +25,38 @@ class IngressoRepository {
     });
   }
 
+  async listarPorUsuario(usuarioId: number) {
+    return prisma.ingresso.findMany({
+      where: {
+        reservaAssento: {
+          reserva: {
+            usuarioId,
+          },
+        },
+      },
+      include: {
+        reservaAssento: {
+          include: {
+            assento: true,
+            reserva: {
+              include: {
+                sessao: {
+                  include: {
+                    filme: true,
+                    sala: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        criadoEm: 'desc',
+      },
+    });
+  }
+
   async validar(codigo: string) {
     return prisma.$transaction(async (tx) => {
       await tx.$queryRaw`

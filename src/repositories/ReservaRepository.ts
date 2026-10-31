@@ -1,8 +1,10 @@
+
 import prisma from '../database/prisma';
 
 interface CriarReservaDTO {
   sessaoId: number;
   assentosIds: number[];
+  usuarioId: number;
 }
 
 class ReservaRepository {
@@ -50,9 +52,10 @@ class ReservaRepository {
         });
       }
 
-      const reserva = await tx.reserva.create({
+      return tx.reserva.create({
         data: {
           sessaoId: dados.sessaoId,
+          usuarioId: dados.usuarioId,
           expiraEm: new Date(agora.getTime() + 10 * 60 * 1000),
           assentos: {
             create: dados.assentosIds.map((assentoId) => ({
@@ -67,8 +70,6 @@ class ReservaRepository {
           },
         },
       });
-
-      return reserva;
     });
   }
 }

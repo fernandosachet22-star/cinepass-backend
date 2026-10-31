@@ -82,17 +82,20 @@ model Sessao {
 }
 
 model Reserva {
-  id       Int           @id @default(autoincrement())
-  criadaEm DateTime      @default(now())
-  expiraEm DateTime
-  status   StatusReserva @default(ATIVA)
-  sessaoId Int
+  id        Int           @id @default(autoincrement())
+  criadaEm  DateTime      @default(now())
+  expiraEm  DateTime
+  status    StatusReserva @default(ATIVA)
+  sessaoId  Int
+  usuarioId Int?
 
   sessao   Sessao           @relation(fields: [sessaoId], references: [id])
+  usuario  Usuario?         @relation(fields: [usuarioId], references: [id])
   assentos ReservaAssento[]
 
   @@index([expiraEm])
   @@index([sessaoId, status])
+  @@index([usuarioId])
 }
 
 model ReservaAssento {
@@ -132,4 +135,6 @@ model Usuario {
   perfil    PerfilUsuario @default(CLIENTE)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+
+  reservas Reserva[]
 }

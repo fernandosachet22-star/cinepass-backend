@@ -3,6 +3,28 @@ import { Request, Response } from 'express';
 import IngressoService from '../services/IngressoService';
 
 class IngressoController {
+  async meus(req: Request, res: Response) {
+    try {
+      const usuarioId = req.usuario?.id;
+
+      if (!usuarioId) {
+        return res.status(401).json({
+          erro: 'Autenticação necessária.',
+        });
+      }
+
+      const ingressos = await IngressoService.listarPorUsuario(usuarioId);
+
+      return res.json(ingressos);
+    } catch (erro) {
+      const mensagem = erro instanceof Error
+        ? erro.message
+        : 'Erro ao consultar ingressos.';
+
+      return res.status(400).json({ erro: mensagem });
+    }
+  }
+
   async buscarPorCodigo(req: Request, res: Response) {
     try {
       const codigo = String(req.params.codigo);
@@ -15,8 +37,11 @@ class IngressoController {
         ? erro.message
         : 'Erro ao consultar ingresso.';
 
-      return res.status(erro instanceof Error && mensagem === 'Ingresso não encontrado.' ? 404 : 400)
-        .json({ erro: mensagem });
+      return res.status(
+        erro instanceof Error && mensagem === 'Ingresso não encontrado.'
+          ? 404
+          : 400
+      ).json({ erro: mensagem });
     }
   }
 

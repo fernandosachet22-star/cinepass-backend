@@ -5,19 +5,33 @@ import ReservaService from '../services/ReservaService';
 class ReservaController {
   async criar(req: Request, res: Response) {
     try {
+      const usuarioId = req.usuario?.id;
+
+      if (!usuarioId) {
+        return res.status(401).json({
+          erro: 'Autenticação necessária.',
+        });
+      }
+
       const sessaoId = Number(req.body.sessaoId);
       const assentosIds = req.body.assentosIds;
 
-      const reserva = await ReservaService.criar(sessaoId, assentosIds);
+      const reserva = await ReservaService.criar(
+        sessaoId,
+        assentosIds,
+        usuarioId
+      );
 
       return res.status(201).json({
-        mensagem: 'Reserva realizada com sucesso! Você tem 10 minutos para concluir a compra.',
+        mensagem:
+          'Reserva realizada com sucesso! Você tem 10 minutos para concluir a compra.',
         reserva,
       });
     } catch (erro) {
       if (erro instanceof Error) {
         if (
           erro.message.includes('inválida') ||
+          erro.message.includes('inválido') ||
           erro.message.includes('Selecione') ||
           erro.message.includes('encontrada') ||
           erro.message.includes('pertencem') ||

@@ -1,9 +1,18 @@
+
 import ReservaRepository from '../repositories/ReservaRepository';
 
 class ReservaService {
-  async criar(sessaoId: number, assentosIds: number[]) {
+  async criar(
+    sessaoId: number,
+    assentosIds: number[],
+    usuarioId: number
+  ) {
     if (!Number.isInteger(sessaoId) || sessaoId <= 0) {
       throw new Error('Sessão inválida.');
+    }
+
+    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+      throw new Error('Usuário inválido.');
     }
 
     if (!Array.isArray(assentosIds) || assentosIds.length === 0) {
@@ -36,12 +45,15 @@ class ReservaService {
     }
 
     if (sessao.dataHora <= new Date()) {
-      throw new Error('Não é possível reservar assentos para uma sessão que já começou.');
+      throw new Error(
+        'Não é possível reservar assentos para uma sessão que já começou.'
+      );
     }
 
     return ReservaRepository.criar({
       sessaoId,
       assentosIds,
+      usuarioId,
     });
   }
 }

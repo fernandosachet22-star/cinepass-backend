@@ -16,6 +16,14 @@ class IngressoService {
     return ingresso;
   }
 
+  async listarPorUsuario(usuarioId: number) {
+    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+      throw new Error('Usuário inválido.');
+    }
+
+    return IngressoRepository.listarPorUsuario(usuarioId);
+  }
+
   async validar(codigo: string) {
     if (!codigo || codigo.trim().length === 0) {
       throw new Error('Informe o código do ingresso.');
@@ -26,4 +34,3 @@ class IngressoService {
 }
 
 export default new IngressoService();
-
