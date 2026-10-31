@@ -28,6 +28,28 @@ class FilmeController {
     }
   };
 
+  atualizar = async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          erro: 'ID do filme inválido.',
+        });
+      }
+
+      const filme = await FilmeService.atualizar(id, req.body);
+
+      return res.status(200).json(filme);
+    } catch (erro) {
+      const mensagem = erro instanceof Error
+        ? erro.message
+        : 'Erro ao atualizar filme.';
+
+      return res.status(400).json({ erro: mensagem });
+    }
+  };
+
   excluir = async (req: Request, res: Response) => {
     try {
       const id = Number(req.params.id);

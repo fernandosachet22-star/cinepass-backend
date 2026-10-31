@@ -37,12 +37,22 @@ class FilmeService {
     return await FilmeRepository.criar(dados);
   }
 
-  async excluir(id: number) {
-    const filme = await FilmeRepository.buscarPorId(id);
+  async atualizar(id: number, dados: CriarFilmeDTO) {
+    await this.buscarPorId(id);
 
-    if (!filme) {
-      throw new Error('Filme não encontrado.');
+    if (!dados.titulo || dados.titulo.trim() === '') {
+      throw new Error('O título do filme é obrigatório.');
     }
+
+    if (!Number.isInteger(dados.duracao) || dados.duracao <= 0) {
+      throw new Error('A duração deve ser maior que zero.');
+    }
+
+    return await FilmeRepository.atualizar(id, dados);
+  }
+
+  async excluir(id: number) {
+    await this.buscarPorId(id);
 
     return await FilmeRepository.excluir(id);
   }

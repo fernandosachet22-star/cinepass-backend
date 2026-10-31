@@ -32,6 +32,13 @@ class FilmeRepository {
     });
   }
 
+  async atualizar(id: number, dados: Omit<Filme, 'id'>) {
+    return prisma.filme.update({
+      where: { id },
+      data: dados,
+    });
+  }
+
   async excluir(id: number) {
     return prisma.filme.delete({
       where: { id },
