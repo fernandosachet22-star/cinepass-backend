@@ -1,5 +1,9 @@
-
 import prisma from '../database/prisma';
+
+export interface IngressoParaValidacao {
+  id: number;
+  utilizadoEm: Date | null;
+}
 
 class IngressoRepository {
   async buscarPorCodigo(codigo: string) {
@@ -57,7 +61,12 @@ class IngressoRepository {
     });
   }
 
-  async validar(codigo: string) {
+  async validar(
+    codigo: string,
+    validarIngresso: (
+      ingresso: IngressoParaValidacao | null
+    ) => IngressoParaValidacao
+  ) {
     return prisma.$transaction(async (tx) => {
       await tx.$queryRaw`
         SELECT id
@@ -70,13 +79,7 @@ class IngressoRepository {
         where: { codigo },
       });
 
-      if (!ingresso) {
-        throw new Error('Ingresso não encontrado.');
-      }
-
-      if (ingresso.utilizadoEm) {
-        throw new Error('Este ingresso já foi utilizado.');
-      }
+      validarIngresso(ingresso);
 
       return tx.ingresso.update({
         where: { codigo },

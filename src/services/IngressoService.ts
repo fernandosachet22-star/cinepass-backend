@@ -1,5 +1,6 @@
-
-import IngressoRepository from '../repositories/IngressoRepository';
+import IngressoRepository, {
+  IngressoParaValidacao,
+} from '../repositories/IngressoRepository';
 
 class IngressoService {
   async buscarPorCodigo(codigo: string) {
@@ -7,7 +8,9 @@ class IngressoService {
       throw new Error('Informe o código do ingresso.');
     }
 
-    const ingresso = await IngressoRepository.buscarPorCodigo(codigo.trim());
+    const ingresso = await IngressoRepository.buscarPorCodigo(
+      codigo.trim()
+    );
 
     if (!ingresso) {
       throw new Error('Ingresso não encontrado.');
@@ -29,7 +32,20 @@ class IngressoService {
       throw new Error('Informe o código do ingresso.');
     }
 
-    return IngressoRepository.validar(codigo.trim());
+    return IngressoRepository.validar(
+      codigo.trim(),
+      (ingresso: IngressoParaValidacao | null) => {
+        if (!ingresso) {
+          throw new Error('Ingresso não encontrado.');
+        }
+
+        if (ingresso.utilizadoEm) {
+          throw new Error('Este ingresso já foi utilizado.');
+        }
+
+        return ingresso;
+      }
+    );
   }
 }
 

@@ -1,5 +1,7 @@
 
-import CompraRepository from '../repositories/CompraRepository';
+import CompraRepository, {
+  ReservaCompra,
+} from '../repositories/CompraRepository';
 
 class CompraService {
   async confirmar(reservaId: number, usuarioId: number) {
@@ -11,7 +13,48 @@ class CompraService {
       throw new Error('Usuário inválido.');
     }
 
-    return CompraRepository.confirmarReserva(reservaId, usuarioId);
+    return CompraRepository.confirmarReserva(
+      reservaId,
+      (reserva: ReservaCompra | null) => {
+        if (!reserva) {
+          throw new Error('Reserva não encontrada.');
+        }
+
+        if (reserva.usuarioId !== usuarioId) {
+          throw new Error(
+            'Você não tem permissão para comprar esta reserva.'
+          );
+        }
+
+        if (reserva.status !== 'ATIVA') {
+          throw new Error('Esta reserva não está ativa.');
+        }
+
+        if (reserva.expiraEm <= new Date()) {
+          throw new Error('O prazo da reserva expirou.');
+        }
+
+        if (reserva.assentos.length === 0) {
+          throw new Error('A reserva não possui assentos.');
+        }
+
+        for (const item of reserva.assentos) {
+          if (item.status !== 'RESERVADO') {
+            throw new Error(
+              'Existe um assento que não está disponível para compra.'
+            );
+          }
+
+          if (item.ingresso) {
+            throw new Error(
+              'Este assento já possui um ingresso emitido.'
+            );
+          }
+        }
+
+        return reserva;
+      }
+    );
   }
 }
 
