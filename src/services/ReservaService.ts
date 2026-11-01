@@ -5,13 +5,16 @@ class ReservaService {
   async criar(
     sessaoId: number,
     assentosIds: number[],
-    usuarioId: number
+    usuarioId: number | null
   ) {
     if (!Number.isInteger(sessaoId) || sessaoId <= 0) {
       throw new Error('Sessão inválida.');
     }
 
-    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+    if (
+      usuarioId !== null &&
+      (!Number.isInteger(usuarioId) || usuarioId <= 0)
+    ) {
       throw new Error('Usuário inválido.');
     }
 

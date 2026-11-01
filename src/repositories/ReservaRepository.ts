@@ -1,10 +1,9 @@
-
 import prisma from '../database/prisma';
 
 interface CriarReservaDTO {
   sessaoId: number;
   assentosIds: number[];
-  usuarioId: number;
+  usuarioId: number | null;
 }
 
 class ReservaRepository {

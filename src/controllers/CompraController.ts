@@ -51,6 +51,37 @@ class CompraController {
       });
     }
   }
+
+  async venderNoBalcao(req: Request, res: Response) {
+    try {
+      const reservaId = Number(req.params.reservaId);
+
+      const compra = await CompraService.confirmarVendaBalcao(
+        reservaId
+      );
+
+      return res.status(200).json({
+        mensagem: 'Venda presencial realizada com sucesso!',
+        compra,
+      });
+    } catch (erro) {
+      if (erro instanceof Error) {
+        if (erro.message.includes('inválido')) {
+          return res.status(400).json({ erro: erro.message });
+        }
+
+        if (erro.message.includes('não encontrada')) {
+          return res.status(404).json({ erro: erro.message });
+        }
+      }
+
+      return res.status(409).json({
+        erro: erro instanceof Error
+          ? erro.message
+          : 'Não foi possível realizar a venda presencial.',
+      });
+    }
+  }
 }
 
 export default new CompraController();
