@@ -70,13 +70,13 @@ Não publicar credenciais ou chaves secretas no GitHub.
 ### 4. Gerar o Prisma Client
 
 ```bash
-npx prisma generate --config prisma.config.ts
+npx prisma generate --config prisma7.config.ts
 ```
 
 ### 5. Executar as migrações
 
 ```bash
-npx prisma migrate deploy --config prisma.config.ts
+npx prisma migrate deploy --config prisma7.config.ts
 ```
 
 ### 6. Iniciar o servidor
